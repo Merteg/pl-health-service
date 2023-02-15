@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "./proto";
+
+service HealthServiceApi {
+    rpc GetAllTargets (EmptyRequest) returns (EmptyResponse) {}
+    rpc GetAllTargetsByMetadata (EmptyRequest) returns (EmptyResponse) {}
+    rpc GetAllMetricsByTargetType (EmptyRequest) returns (EmptyResponse) {}
+}
+
+message EmptyRequest {
+    string empty = 1;
+}
+
+message EmptyResponse {
+    string empty = 1;
+}
+
+message Target {
+    string ID = 1;
+    repeated string metrics = 2;
+    repeated string counters = 3;
+    repeated string totalCounters = 4;
+    string type = 5;
+    map<string,string> metadata = 6;
+    bool heartbeat = 7;
+}
+
+message Health {
+    string targetID = 1;
+    string targetType = 2;
+    HealthStatus status = 3;
+    bool hearthbeat = 4;
+    map<string, int32> counters = 5;
+    map<string, double> metrics = 6;
+    repeated Message messages = 7;
+    int64 timestamp = 8;
+}
+
+message Message {
+    string summary = 1;
+    string error = 2;
+    bool affectHealth = 3;
+    HealthStatus status = 4;
+}
+
+enum HealthStatus {
+    UNKNOWN = 0;
+    HEALTHY = 1;
+    DEGRADE = 2;
+    UNHEALTHY = 3;
+}
