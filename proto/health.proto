@@ -25,7 +25,6 @@ message PushRequest {
 }
 
 message PushResponse {
-    string empty = 1;
 }
 
 message Target {
