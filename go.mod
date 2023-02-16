@@ -1,4 +1,4 @@
-module pl-health-service/gen/proto
+module workspace
 
 go 1.19
 

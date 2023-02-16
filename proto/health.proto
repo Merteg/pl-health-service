@@ -1,20 +1,30 @@
 syntax = "proto3";
 
-package main;
+package proto;
 
-option go_package = "./proto";
+import "google/protobuf/wrappers.proto";
 
-service HealthServiceApi {
-    rpc GetAllTargets (EmptyRequest) returns (EmptyResponse) {}
-    rpc GetAllTargetsByMetadata (EmptyRequest) returns (EmptyResponse) {}
-    rpc GetAllMetricsByTargetType (EmptyRequest) returns (EmptyResponse) {}
+option go_package = "github.com/Merteg/pl-health-service";
+
+
+service HealthService {
+    rpc Register (RegisterRequest) returns (RegisterResponse) {}
+    rpc Push (PushRequest) returns (PushResponse) {}
 }
 
-message EmptyRequest {
+message RegisterRequest {
+    repeated Target target = 1;
+}
+
+message RegisterResponse {
     string empty = 1;
 }
 
-message EmptyResponse {
+message PushRequest {
+    repeated Health health = 1;
+}
+
+message PushResponse {
     string empty = 1;
 }
 
@@ -23,7 +33,7 @@ message Target {
     repeated string metrics = 2;
     repeated string counters = 3;
     repeated string totalCounters = 4;
-    string type = 5;
+    string targetType = 5;
     map<string,string> metadata = 6;
     bool heartbeat = 7;
 }
@@ -32,7 +42,7 @@ message Health {
     string targetID = 1;
     string targetType = 2;
     HealthStatus status = 3;
-    bool hearthbeat = 4;
+    google.protobuf.BoolValue hearthbeat = 4;
     map<string, int32> counters = 5;
     map<string, double> metrics = 6;
     repeated Message messages = 7;
