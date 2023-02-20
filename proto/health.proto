@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/wrappers.proto";
+
+option go_package = "github.com/Merteg/pl-health-service";
+
+
+service HealthService {
+    rpc Register (RegisterRequest) returns (RegisterResponse) {}
+    rpc Push (PushRequest) returns (PushResponse) {}
+}
+
+message RegisterRequest {
+    repeated Target target = 1;
+}
+
+message RegisterResponse {
+}
+
+message PushRequest {
+    repeated Health health = 1;
+}
+
+message PushResponse {
+}
+
+message Target {
+    string ID = 1;
+    repeated string metrics = 2;
+    repeated string counters = 3;
+    repeated string totalCounters = 4;
+    string targetType = 5;
+    map<string,string> metadata = 6;
+    bool heartbeat = 7;
+}
+
+message Health {
+    string targetID = 1;
+    string targetType = 2;
+    HealthStatus status = 3;
+    google.protobuf.BoolValue hearthbeat = 4;
+    map<string, int32> counters = 5;
+    map<string, double> metrics = 6;
+    repeated Message messages = 7;
+    int64 timestamp = 8;
+}
+
+message Message {
+    string summary = 1;
+    string error = 2;
+    bool affectHealth = 3;
+    HealthStatus status = 4;
+}
+
+enum HealthStatus {
+    UNKNOWN = 0;
+    HEALTHY = 1;
+    DEGRADE = 2;
+    UNHEALTHY = 3;
+}
