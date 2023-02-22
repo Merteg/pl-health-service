@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.12
-// source: proto/health.proto
+// source: health.proto
 
-package pl_health_service
+package proto
 
 import (
 	context "context"
@@ -137,5 +137,5 @@ var HealthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/health.proto",
+	Metadata: "health.proto",
 }
