@@ -10,19 +10,21 @@ import (
 	"google.golang.org/grpc"
 )
 
+const port string = "localhost:8080"
+
 func main() {
-	listener, err := net.Listen("tcp", "localhost:8080")
+	listener, err := net.Listen("tcp", port)
 	if err != nil {
-		log.Fatal().Msg("unable to listen on localhost:8080")
-	} else {
-		log.Printf("start gRPC server at localhost:8080", listener)
+		resp := "unable to listen on" + port
+		log.Fatal().Msg(resp)
 	}
 
 	serv := grpc.NewServer()
-	proto.RegisterHealthServiceServer(serv, &service.Server{})
+	proto.RegisterHealthServiceServer(serv, &service.Health{})
 	if err = serv.Serve(listener); err != nil {
 		log.Error().Err(err).Msg("Problem with services")
 	} else {
-		log.Printf("start gRPC server at %s", listener.Addr().String())
+		str := "start gRPC server at " + listener.Addr().String()
+		log.Info().Msg(str)
 	}
 }
