@@ -4,7 +4,7 @@ package proto;
 
 import "google/protobuf/wrappers.proto";
 
-option go_package = "github.com/Merteg/pl-health-service";
+option go_package = "github.com/Merteg/proto";
 
 
 service HealthService {
