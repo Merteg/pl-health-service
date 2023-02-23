@@ -15,8 +15,11 @@ import (
 	"google.golang.org/grpc"
 )
 
-const port string = "localhost:8080"
-const mongoURI string = "mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test"
+const port = "localhost:8080"
+const mongoURI = "mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test"
+const healthdb = "pl-health-service"
+const coll1 = "targets"
+const coll2 = "health"
 
 func init() {
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
@@ -33,25 +36,31 @@ func init() {
 		log.Fatal().Err(err)
 	}
 
-	targetCollection, err := client.Database("pl-health-service").ListCollectionNames(context.TODO(), bson.M{"name": "target"})
+	targetCollection, err := client.Database(healthdb).ListCollectionNames(ctx, bson.M{"name": coll1})
 	if err != nil {
 		log.Fatal().Err(err)
 	}
 	if len(targetCollection) == 0 {
-		_ = client.Database("pl-health-service").CreateCollection(context.TODO(), "target")
-		log.Info().Msg("target collection created and ready")
+		err = client.Database(healthdb).CreateCollection(ctx, coll1)
+		if err != nil {
+			log.Fatal().Err(err)
+		}
+		log.Info().Msg("Collection created:" + coll1)
 	} else {
-		log.Info().Msg("target collection ready")
+		log.Info().Msg("collection exist:" + coll1)
 	}
-	healthCollection, err := client.Database("pl-health-service").ListCollectionNames(context.TODO(), bson.M{"name": "health"})
+	healthCollection, err := client.Database(healthdb).ListCollectionNames(ctx, bson.M{"name": coll2})
 	if err != nil {
 		log.Fatal().Err(err)
 	}
 	if len(healthCollection) == 0 {
-		_ = client.Database("pl-health-service").CreateCollection(context.TODO(), "health")
-		log.Info().Msg("health collection created and ready")
+		err = client.Database(healthdb).CreateCollection(ctx, coll2)
+		if err != nil {
+			log.Fatal().Err(err)
+		}
+		log.Info().Msg("Collection created:" + coll2)
 	} else {
-		log.Info().Msg("health collection ready")
+		log.Info().Msg("Collection exist:" + coll2)
 	}
 }
 
