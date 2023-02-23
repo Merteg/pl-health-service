@@ -16,11 +16,11 @@ import (
 )
 
 const (
-    port = "localhost:8080"
-    mongoURI = "mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test"
-    dbName = "pl-health-service"
-    targetsCollName = "targets"
-    healthCollName = "health"
+	port            = "localhost:8080"
+	mongoURI        = "mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test"
+	dbName          = "pl-health-service"
+	targetsCollName = "targets"
+	healthCollName  = "health"
 )
 
 func init() {
@@ -38,31 +38,32 @@ func init() {
 		log.Fatal().Err(err)
 	}
 
-	targetCollection, err := client.Database(healthdb).ListCollectionNames(ctx, bson.M{"name": coll1})
+	targetCollection, err := client.Database(dbName).ListCollectionNames(ctx, bson.M{"name": targetsCollName})
 	if err != nil {
 		log.Fatal().Err(err)
 	}
 	if len(targetCollection) == 0 {
-		err = client.Database(healthdb).CreateCollection(ctx, coll1)
+		err = client.Database(dbName).CreateCollection(ctx, targetsCollName)
 		if err != nil {
 			log.Fatal().Err(err)
 		}
-		log.Info().Msg("Collection created:" + coll1)
+		log.Info().Msg("Collection created:" + targetsCollName)
 	} else {
-		log.Info().Msg("collection exist:" + coll1)
+		log.Info().Msg("collection exist:" + targetsCollName)
 	}
-	healthCollection, err := client.Database(healthdb).ListCollectionNames(ctx, bson.M{"name": coll2})
+
+	healthCollection, err := client.Database(dbName).ListCollectionNames(ctx, bson.M{"name": healthCollName})
 	if err != nil {
 		log.Fatal().Err(err)
 	}
 	if len(healthCollection) == 0 {
-		err = client.Database(healthdb).CreateCollection(ctx, coll2)
+		err = client.Database(dbName).CreateCollection(ctx, healthCollName)
 		if err != nil {
 			log.Fatal().Err(err)
 		}
-		log.Info().Msg("Collection created:" + coll2)
+		log.Info().Msg("Collection created:" + healthCollName)
 	} else {
-		log.Info().Msg("Collection exist:" + coll2)
+		log.Info().Msg("Collection exist:" + healthCollName)
 	}
 }
 
