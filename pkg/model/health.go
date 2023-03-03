@@ -1,6 +1,7 @@
 package model
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/Merteg/pl-health-service/proto"
@@ -26,13 +27,19 @@ type Message struct {
 }
 
 func (h *Health) FromProto(health *proto.Health) {
+	heartbeat := health.GetHearthbeat()
+	msgs := make([]*Message, 0, len(health.Messages))
+	for _, message := range health.Messages {
+		msgs = append(msgs, MessageFromProto(message))
+	}
+
 	h.TargetID = health.GetTargetID()
 	h.TargetType = health.GetTargetType()
 	h.Status = health.GetStatus().String()
-	h.Hearthbeat = health.GetHearthbeat()
+	h.Hearthbeat = heartbeat.Value
 	h.Counters = health.GetCounters()
 	h.Metrics = health.GetMetrics()
-	h.Messages = health.GetMessages()
+	h.Messages = msgs
 	h.Timestamp = health.GetTimestamp()
 }
 
@@ -44,7 +51,7 @@ func (h *Health) ToProto() *proto.Health {
 	return &proto.Health{
 		TargetID:   h.TargetID,
 		TargetType: h.TargetType,
-		Status:     StatusToEnum(h.Status),
+		Status:     proto.HealthStatus(StatusToEnum(h.Status)),
 		Hearthbeat: &wrapperspb.BoolValue{Value: h.Hearthbeat},
 		Counters:   h.Counters,
 		Metrics:    h.Metrics,
@@ -56,11 +63,32 @@ func (h *Health) ToProto() *proto.Health {
 func StatusToEnum(status string) int32 {
 	i64, err := strconv.ParseInt(status, 10, 32)
 	if err != nil {
-		return 0
+		log.Panic()
+	}
+
+	if 0 > int32(i64) {
+		log.Panic()
+	}
+	if int32(i64) < 3 {
+		log.Panic()
 	}
 	return int32(i64)
 }
 
 func MessageToProto(msg *Message) *proto.Message {
+	var mesageResp proto.Message
+	mesageResp.Summary = msg.Summary
+	mesageResp.Error = msg.Error
+	mesageResp.AffectHealth = msg.AffectedHealth
+	mesageResp.Status = msg.Status
+	return &mesageResp
+}
 
+func MessageFromProto(msg *proto.Message) *Message {
+	var mesageResp Message
+	mesageResp.Summary = msg.Summary
+	mesageResp.Error = msg.Error
+	mesageResp.AffectedHealth = msg.AffectHealth
+	mesageResp.Status = msg.Status
+	return &mesageResp
 }
