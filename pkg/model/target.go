@@ -14,7 +14,7 @@ type Target struct {
 	Heartbeat     bool              `json:"hearbeat,omitempty", bson:"heartbeat, omitempty" validate:"required"`
 }
 
-func (t *Target) ConvertToSchema(target *proto.Target) {
+func (t *Target) FromProto(target *proto.Target) {
 	t.Metrics = target.GetMetrics()
 	t.Counters = target.GetCounters()
 	t.TotalCounters = target.GetTotalCounters()
@@ -23,7 +23,7 @@ func (t *Target) ConvertToSchema(target *proto.Target) {
 	t.Heartbeat = target.GetHeartbeat()
 }
 
-func (t *Target) ConvertToProto() *proto.Target {
+func (t *Target) ToProto() *proto.Target {
 	return &proto.Target{
 		Metrics:       t.Metrics,
 		Counters:      t.Counters,
