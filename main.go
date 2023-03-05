@@ -15,7 +15,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-const port string = "localhost:8080"
+const (
+	port            = "localhost:8080"
+	mongoURI        = "mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test"
+	dbName          = "pl-health-service"
+	targetsCollName = "targets"
+	healthCollName  = "health"
+)
 
 func init() {
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
