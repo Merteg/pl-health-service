@@ -15,6 +15,7 @@ type Target struct {
 }
 
 func (t *Target) FromProto(target *proto.Target) {
+	t.Id = target.GetID()
 	t.Metrics = target.GetMetrics()
 	t.Counters = target.GetCounters()
 	t.TotalCounters = target.GetTotalCounters()
@@ -25,6 +26,7 @@ func (t *Target) FromProto(target *proto.Target) {
 
 func (t *Target) ToProto() *proto.Target {
 	return &proto.Target{
+		ID:            t.Id,
 		Metrics:       t.Metrics,
 		Counters:      t.Counters,
 		TotalCounters: t.TotalCounters,

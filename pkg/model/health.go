@@ -6,7 +6,7 @@ import (
 )
 
 type Health struct {
-	Id         string             `json:"_id,omitempty" bson:"_id, omitempty"`
+	// Id         string             `json:"_id,omitempty" bson:"_id, omitempty"`
 	TargetID   string             `json:"targetid,omitempty" validate:"required" bson:"targetid, omitempty"`
 	TargetType string             `json:"targettype,omitempty" validate:"required" bson:"targettype, omitempty"`
 	Status     string             `json:"healthstatus,omitempty"  bson:"healthstatus, omitempty"`

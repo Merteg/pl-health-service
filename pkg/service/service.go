@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/Merteg/pl-health-service/pkg/model"
@@ -43,7 +42,7 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 		log.Fatal().Err(err)
 	}
 
-	collection := client.Database(dbName).Collection(healthCollName)
+	healthcollection := client.Database(dbName).Collection(healthCollName)
 	var health []*proto.Health = req.GetHealth()
 
 	for _, reqhealth := range health {
@@ -51,16 +50,22 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 
 		var resphealth model.Health
 
-		error := collection.FindOne(context.TODO(), bson.M{"targetid": id}).Decode(&resphealth)
+		error := healthcollection.FindOne(context.TODO(), bson.M{"targetid": id}).Decode(&resphealth)
 		if error != nil {
 			log.Fatal().Err(err)
 		}
 
 		if resphealth.TargetID == "" {
+			targetcollection := client.Database(dbName).Collection(targetsCollName)
+			var target model.Target
 
+			error := targetcollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&target)
+			if error != nil {
+				log.Fatal().Err(err)
+			}
 			resphealth.FromProto(reqhealth)
 
-			_, err := collection.InsertOne(ctx, resphealth)
+			_, err := healthcollection.InsertOne(ctx, resphealth)
 			if err != nil {
 				log.Fatal().Err(err)
 			}
@@ -71,6 +76,50 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 	return &proto.PushResponse{}, nil
 }
 
-func (s *Health) Register(ctx context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
-	return nil, errors.New("not implemented")
+func (s *Health) Register(c context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
+	client := mongodbClient()
+
+	collection := client.Database(dbName).Collection(targetsCollName)
+	var target []*proto.Target = req.GetTarget()
+
+	for _, reqtarget := range target {
+		id := reqtarget.ID
+
+		var resptarget model.Target
+
+		error := collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&resptarget)
+		if error != nil {
+			log.Fatal().Err(err)
+		}
+
+		if resptarget.Id == "" {
+
+			resptarget.FromProto(reqtarget)
+
+			_, err := collection.InsertOne(ctx, resptarget)
+			if err != nil {
+				log.Fatal().Err(err)
+			}
+		} else {
+			status.Error(codes.AlreadyExists, "This TargetID already exist")
+		}
+	}
+	return &proto.RegisterResponse{}, nil
+}
+
+func mongodbClient() *mongo.Client {
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	if err != nil {
+		log.Fatal().Err(err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal().Err(err)
+	}
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Fatal().Err(err)
+	}
+	return client
 }
