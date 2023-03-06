@@ -5,13 +5,13 @@ import (
 )
 
 type Target struct {
-	Id            string            `json:"_id,omitempty" validate:"required"`
-	Metrics       []string          `json:"metrics,omitempty", bson:"metrics, omitempty"  `
-	Counters      []string          `json:"counters,omitempty", bson:"counters, omitempty"  `
-	TotalCounters []string          `json:"totalcounters,omitempty", bson:"totalcounters, omitempty"  validate:"required"`
-	TargetType    string            `json:"targettype,omitempty", bson:"targettype, omitempty"  validate:"required"`
-	Metadata      map[string]string `json:"metadata,omitempty", bson:"metadata, omitempty"  validate:"required"`
-	Heartbeat     bool              `json:"hearbeat,omitempty", bson:"heartbeat, omitempty" validate:"required"`
+	Id            string            `json:"_id,omitempty" validate:"required" bson:"_id,omitempty"`
+	Metrics       []string          `json:"metrics,omitempty" bson:"metrics, omitempty"`
+	Counters      []string          `json:"counters,omitempty" bson:"counters, omitempty"`
+	TotalCounters []string          `json:"totalcounters,omitempty" bson:"totalcounters, omitempty"`
+	TargetType    string            `json:"targettype,omitempty" bson:"targettype, omitempty"  validate:"required"`
+	Metadata      map[string]string `json:"metadata,omitempty" bson:"metadata, omitempty"  validate:"required"`
+	Heartbeat     bool              `json:"hearbeat,omitempty" bson:"heartbeat, omitempty" validate:"required"`
 }
 
 func (t *Target) FromProto(target *proto.Target) {
