@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Merteg/pl-health-service/config"
 	"github.com/Merteg/pl-health-service/pkg/model"
 	"github.com/Merteg/pl-health-service/proto"
 	"github.com/rs/zerolog/log"
@@ -18,17 +19,11 @@ type Health struct {
 	proto.UnimplementedHealthServiceServer
 }
 
-const (
-	port            = "localhost:8080"
-	mongoURI        = "mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test"
-	dbName          = "pl-health-service"
-	targetsCollName = "targets"
-	healthCollName  = "health"
-)
+var mongoconfig = config.GetConfig().Mongo
 
 func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushResponse, error) {
 	client := mongodbClient()
-	healthcollection := client.Database(dbName).Collection(healthCollName)
+	healthcollection := client.Database(mongoconfig["dbname"]).Collection(mongoconfig["healthcollname"])
 	var health []*proto.Health = req.GetHealth()
 
 	for _, reqhealth := range health {
@@ -42,7 +37,7 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 		}
 
 		if resphealth.TargetID == "" {
-			targetcollection := client.Database(dbName).Collection(targetsCollName)
+			targetcollection := client.Database(mongoconfig["dbname"]).Collection(mongoconfig["targetscollname"])
 			var target model.Target
 
 			error := targetcollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&target)
@@ -65,7 +60,7 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 func (s *Health) Register(c context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
 	client := mongodbClient()
 
-	collection := client.Database(dbName).Collection(targetsCollName)
+	collection := client.Database(mongoconfig["dbname"]).Collection(mongoconfig["targetscollname"])
 	var target []*proto.Target = req.GetTarget()
 
 	for _, reqtarget := range target {
@@ -94,7 +89,7 @@ func (s *Health) Register(c context.Context, req *proto.RegisterRequest) (*proto
 }
 
 func mongodbClient() *mongo.Client {
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoconfig["mongouri"]))
 	if err != nil {
 		log.Fatal().Err(err)
 	}

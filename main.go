@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"time"
 
@@ -17,16 +16,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-const (
-	port            = "localhost:8080"
-	mongoURI        = "mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test"
-	dbName          = "pl-health-service"
-	targetsCollName = "targets"
-	healthCollName  = "health"
-)
+var mongoconfig = config.GetConfig().Mongo
 
 func init() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoconfig["mongouri"]))
 	if err != nil {
 		log.Fatal().Err(err)
 	}
@@ -40,42 +33,39 @@ func init() {
 		log.Fatal().Err(err)
 	}
 
-	targetCollection, err := client.Database(dbName).ListCollectionNames(ctx, bson.M{"name": targetsCollName})
+	targetCollection, err := client.Database(mongoconfig["dbname"]).ListCollectionNames(ctx, bson.M{"name": mongoconfig["targetscollname"]})
 	if err != nil {
 		log.Fatal().Err(err)
 	}
 	if len(targetCollection) == 0 {
-		err = client.Database(dbName).CreateCollection(ctx, targetsCollName)
+		err = client.Database(mongoconfig["dbname"]).CreateCollection(ctx, mongoconfig["targetscollname"])
 		if err != nil {
 			log.Fatal().Err(err)
 		}
-		log.Info().Msg("Collection created:" + targetsCollName)
+		log.Info().Msg("Collection created:" + mongoconfig["targetscollname"])
 	} else {
-		log.Info().Msg("collection exist:" + targetsCollName)
+		log.Info().Msg("collection exist:" + mongoconfig["targetscollname"])
 	}
 
-	healthCollection, err := client.Database(dbName).ListCollectionNames(ctx, bson.M{"name": healthCollName})
+	healthCollection, err := client.Database(mongoconfig["dbname"]).ListCollectionNames(ctx, bson.M{"name": mongoconfig["healthcollname"]})
 	if err != nil {
 		log.Fatal().Err(err)
 	}
 	if len(healthCollection) == 0 {
-		err = client.Database(dbName).CreateCollection(ctx, healthCollName)
+		err = client.Database(mongoconfig["dbname"]).CreateCollection(ctx, mongoconfig["healthcollname"])
 		if err != nil {
 			log.Fatal().Err(err)
 		}
-		log.Info().Msg("Collection created:" + healthCollName)
+		log.Info().Msg("Collection created:" + mongoconfig["healthcollname"])
 	} else {
-		log.Info().Msg("Collection exist:" + healthCollName)
+		log.Info().Msg("Collection exist:" + mongoconfig["healthcollname"])
 	}
 }
 
 func main() {
-	fmt.Println("se viene el config")
-	conf := config.GetConfig()
-	fmt.Println(conf.Mongo)
-	listener, err := net.Listen("tcp", port)
+	listener, err := net.Listen("tcp", mongoconfig["port"])
 	if err != nil {
-		resp := "unable to listen on" + port
+		resp := "unable to listen on" + mongoconfig["port"]
 		log.Fatal().Msg(resp)
 	}
 

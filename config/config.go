@@ -26,7 +26,5 @@ func GetConfig() Configuration {
 	if err != nil {
 		panic(err)
 	}
-
 	return conf
-
 }
