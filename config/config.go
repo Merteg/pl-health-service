@@ -1,22 +1,12 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
 
 type Configuration struct {
 	Environment string
-	Mongo       MongoConfiguration
-}
-
-type MongoConfiguration struct {
-	mongoURI        string
-	port            string
-	dbName          string
-	targetsCollName string
-	healthCollName  string
+	Mongo       map[string]string
 }
 
 func GetConfig() Configuration {
@@ -37,7 +27,6 @@ func GetConfig() Configuration {
 		panic(err)
 	}
 
-	fmt.Println(conf)
 	return conf
 
 }

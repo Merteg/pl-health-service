@@ -71,8 +71,8 @@ func init() {
 
 func main() {
 	fmt.Println("se viene el config")
-	go config.GetConfig()
-
+	conf := config.GetConfig()
+	fmt.Println(conf.Mongo)
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		resp := "unable to listen on" + port
