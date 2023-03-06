@@ -1,0 +1,7 @@
+environment: dev
+mongo:
+  mongoURI: mongodb+srv://admin:admin@pl-health-service.s25udti.mongodb.net/test
+  port: localhost:8080
+  dbName: pl-health-service
+  targetsCollName: targets
+  healthCollName: health

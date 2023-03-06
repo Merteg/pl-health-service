@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"time"
 
+	"github.com/Merteg/pl-health-service/config"
 	service "github.com/Merteg/pl-health-service/pkg/service"
 	"github.com/Merteg/pl-health-service/proto"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -68,6 +70,9 @@ func init() {
 }
 
 func main() {
+	fmt.Println("se viene el config")
+	go config.GetConfig()
+
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
 		resp := "unable to listen on" + port

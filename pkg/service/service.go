@@ -27,21 +27,7 @@ const (
 )
 
 func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushResponse, error) {
-
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
-	if err != nil {
-		log.Fatal().Err(err)
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal().Err(err)
-	}
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		log.Fatal().Err(err)
-	}
-
+	client := mongodbClient()
 	healthcollection := client.Database(dbName).Collection(healthCollName)
 	var health []*proto.Health = req.GetHealth()
 
@@ -52,7 +38,7 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 
 		error := healthcollection.FindOne(context.TODO(), bson.M{"targetid": id}).Decode(&resphealth)
 		if error != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(error)
 		}
 
 		if resphealth.TargetID == "" {
@@ -61,11 +47,11 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 
 			error := targetcollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&target)
 			if error != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(error)
 			}
 			resphealth.FromProto(reqhealth)
 
-			_, err := healthcollection.InsertOne(ctx, resphealth)
+			_, err := healthcollection.InsertOne(c, resphealth)
 			if err != nil {
 				log.Fatal().Err(err)
 			}
@@ -89,14 +75,14 @@ func (s *Health) Register(c context.Context, req *proto.RegisterRequest) (*proto
 
 		error := collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&resptarget)
 		if error != nil {
-			log.Fatal().Err(err)
+			log.Fatal().Err(error)
 		}
 
 		if resptarget.Id == "" {
 
 			resptarget.FromProto(reqtarget)
 
-			_, err := collection.InsertOne(ctx, resptarget)
+			_, err := collection.InsertOne(c, resptarget)
 			if err != nil {
 				log.Fatal().Err(err)
 			}
