@@ -10,6 +10,7 @@ option go_package = "github.com/Merteg/proto";
 service HealthService {
     rpc Register (RegisterRequest) returns (RegisterResponse) {}
     rpc Push (PushRequest) returns (PushResponse) {}
+    rpc Get (GetRquest) returns (GetResponse) {}
 }
 
 message RegisterRequest {

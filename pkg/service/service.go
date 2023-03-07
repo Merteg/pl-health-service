@@ -22,7 +22,7 @@ type Health struct {
 var mongoconfig = config.GetConfig().Mongo
 
 func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushResponse, error) {
-	client := mongodbClient()
+	client, ctx := MongodbClient()
 	healthcollection := client.Database(mongoconfig["dbname"]).Collection(mongoconfig["healthcollname"])
 	var health []*proto.Health = req.GetHealth()
 
@@ -46,7 +46,7 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 			}
 			resphealth.FromProto(reqhealth)
 
-			_, err := healthcollection.InsertOne(c, resphealth)
+			_, err := healthcollection.InsertOne(ctx, resphealth)
 			if err != nil {
 				log.Fatal().Err(err)
 			}
@@ -58,7 +58,7 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 }
 
 func (s *Health) Register(c context.Context, req *proto.RegisterRequest) (*proto.RegisterResponse, error) {
-	client := mongodbClient()
+	client, ctx := MongodbClient()
 
 	collection := client.Database(mongoconfig["dbname"]).Collection(mongoconfig["targetscollname"])
 	var target []*proto.Target = req.GetTarget()
@@ -77,7 +77,7 @@ func (s *Health) Register(c context.Context, req *proto.RegisterRequest) (*proto
 
 			resptarget.FromProto(reqtarget)
 
-			_, err := collection.InsertOne(c, resptarget)
+			_, err := collection.InsertOne(ctx, resptarget)
 			if err != nil {
 				log.Fatal().Err(err)
 			}
@@ -88,7 +88,7 @@ func (s *Health) Register(c context.Context, req *proto.RegisterRequest) (*proto
 	return &proto.RegisterResponse{}, nil
 }
 
-func mongodbClient() *mongo.Client {
+func MongodbClient() (*mongo.Client, context.Context) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoconfig["mongouri"]))
 	if err != nil {
 		log.Fatal().Err(err)
@@ -102,5 +102,5 @@ func mongodbClient() *mongo.Client {
 	if err != nil {
 		log.Fatal().Err(err)
 	}
-	return client
+	return client, ctx
 }

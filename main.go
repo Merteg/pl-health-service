@@ -1,15 +1,13 @@
 package main
 
 import (
-	"context"
+	"flag"
 	"net"
-	"time"
 
 	"github.com/Merteg/pl-health-service/config"
+	"github.com/Merteg/pl-health-service/pkg/client"
 	service "github.com/Merteg/pl-health-service/pkg/service"
 	"github.com/Merteg/pl-health-service/proto"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/rs/zerolog/log"
@@ -19,19 +17,7 @@ import (
 var mongoconfig = config.GetConfig().Mongo
 
 func init() {
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoconfig["mongouri"]))
-	if err != nil {
-		log.Fatal().Err(err)
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal().Err(err)
-	}
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		log.Fatal().Err(err)
-	}
+	client, ctx := service.MongodbClient()
 
 	targetCollection, err := client.Database(mongoconfig["dbname"]).ListCollectionNames(ctx, bson.M{"name": mongoconfig["targetscollname"]})
 	if err != nil {
@@ -63,6 +49,15 @@ func init() {
 }
 
 func main() {
+	// Parse command line arguments
+	isClient := flag.Bool("client", false, "Run in test client mode")
+	flag.Parse()
+
+	// Run client test if --client argument is passed
+	if *isClient {
+		client.Testclient()
+		return
+	}
 	listener, err := net.Listen("tcp", mongoconfig["port"])
 	if err != nil {
 		resp := "unable to listen on" + mongoconfig["port"]
@@ -77,4 +72,5 @@ func main() {
 		str := "start gRPC server at " + listener.Addr().String()
 		log.Info().Msg(str)
 	}
+
 }
