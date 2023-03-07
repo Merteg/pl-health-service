@@ -17,10 +17,10 @@ type Health struct {
 }
 
 type Message struct {
-	Summary        string `json:"Summary" bson:"Summary"`
-	Error          string `json:"Error" bson:"Error"`
-	AffectedHealth bool   `json:"AffectedHealth" bson:"AffectedHealth"`
-	Status         string `json:"Status" bson:"Status"`
+	Summary        string `json:"summary" bson:"summary"`
+	Error          string `json:"error" bson:"error"`
+	AffectedHealth bool   `json:"affectedhealth" bson:"affectedhealth"`
+	Status         string `json:"status" bson:"status"`
 }
 
 func (h *Health) FromProto(health *proto.Health) {
