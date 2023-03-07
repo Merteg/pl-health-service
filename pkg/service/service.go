@@ -40,23 +40,25 @@ func (s *Health) Push(c context.Context, req *proto.PushRequest) (*proto.PushRes
 			targetcollection := client.Database(mongoconfig["dbname"]).Collection(mongoconfig["targetscollname"])
 			var target model.Target
 
-			error := targetcollection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&target)
+			error := targetcollection.FindOne(c, bson.M{"_id": id}).Decode(&target)
 			if error != nil {
 				log.Fatal().Err(error)
 			}
+
 			cont := 0
 			for _, k := range target.Metrics {
 				if _, ok := reqhealth.Metrics[k]; ok {
 					cont++
+
 				}
-			}
-			if cont == len(target.Metrics) {
+				if cont == len(target.Metrics) {
 
-				resphealth.FromProto(reqhealth)
+					resphealth.FromProto(reqhealth)
 
-				_, err := healthcollection.InsertOne(ctx, resphealth)
-				if err != nil {
-					log.Fatal().Err(err)
+					_, err := healthcollection.InsertOne(ctx, resphealth)
+					if err != nil {
+						log.Fatal().Err(err)
+					}
 				}
 			}
 		} else {
